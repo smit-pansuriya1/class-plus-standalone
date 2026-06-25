@@ -9,7 +9,7 @@
 
 export const TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGlrZXkiOiI4N2I3MmYyYy1mOTc3LTQyMjktODQxMS0wZTIxYzc1N2IyNGMiLCJwZXJtaXNzaW9ucyI6WyJhbGxvd19qb2luIl0sImlhdCI6MTc4MjM4MjQ1OCwiZXhwIjoxODEzOTE4NDU4fQ.SioD3xXO0NXSpqKI3um3CWGiwgHSBxclpyrkzhLOqZ4";
 
-export const MEETING_ID = "on5k-df0f-2hcg";
+export const MEETING_ID = "z2uc-axz4-pm4n";
 
 // e.g. "api.classplus-dev.videosdk.live" for the Classplus dev deployment,
 // or "" to use the default api.videosdk.live signaling.

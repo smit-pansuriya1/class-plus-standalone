@@ -166,7 +166,11 @@ function MeetingSurface({ roomId, role, audienceMode, onMeetingEnd }) {
   // --- Flow A: four plain-string PubSub channels (no JSON) -------------------
 
   // raiseHand: student publishes its own id; the tutor tracks pending hands.
+  // bufferMessages:false — we react via onMessageReceived and never read the
+  // hook's `messages`, so skip the internal buffer that would otherwise
+  // re-render MeetingSurface (and the whole grid) on every control event.
   const { publish: publishRaiseHand } = usePubSub(TOPICS.RAISE_HAND, {
+    bufferMessages: false,
     onMessageReceived: ({ message, senderId }) => {
       const id = message || senderId;
       if (!isTutor || !id) {
@@ -178,6 +182,7 @@ function MeetingSurface({ roomId, role, audienceMode, onMeetingEnd }) {
 
   // lowerHand: student cancels its request; the tutor drops it from pending.
   const { publish: publishLowerHand } = usePubSub(TOPICS.LOWER_HAND, {
+    bufferMessages: false,
     onMessageReceived: ({ message, senderId }) => {
       const id = message || senderId;
       if (!isTutor || !id) {
@@ -190,6 +195,7 @@ function MeetingSurface({ roomId, role, audienceMode, onMeetingEnd }) {
   // handResponse: tutor broadcasts "accept:<id>"/"reject:<id>"; each student
   // reacts only to the response addressed to it.
   const { publish: publishHandResponse } = usePubSub(TOPICS.HAND_RESPONSE, {
+    bufferMessages: false,
     onMessageReceived: ({ message }) => {
       const { verb, target } = parseHandResponse(message);
       if (target !== localParticipantId) {
@@ -210,12 +216,18 @@ function MeetingSurface({ roomId, role, audienceMode, onMeetingEnd }) {
 
   // removeFromStage: tutor publishes the id; that on-stage student downgrades.
   const { publish: publishRemoveFromStage } = usePubSub(TOPICS.REMOVE_FROM_STAGE, {
+    bufferMessages: false,
     onMessageReceived: ({ message }) => {
       if (message === localParticipantId) {
         downgradeToAudience();
       }
     },
   });
+
+  // NOTE: the CHAT subscription deliberately lives in ChatPanel (an always-
+  // mounted leaf), NOT here. Hosting usePubSub("CHAT") in this component would
+  // re-render the entire video grid on every message and starve the socket
+  // heartbeat under load. See ChatPanel.js.
 
   // Student raise/lower (the control button toggles between the two).
   const handleRaiseHand = () => {
@@ -302,7 +314,9 @@ function MeetingSurface({ roomId, role, audienceMode, onMeetingEnd }) {
         </div>
       </header>
 
-      {showGrid && presenterId ? <PresenterView presenterId={presenterId} /> : null}
+      <div className="meeting-body">
+        <div className="meeting-main">
+          {showGrid && presenterId ? <PresenterView presenterId={presenterId} /> : null}
 
       {isTutor && (pendingHands.length > 0 || active.length > 0) ? (
         <aside className="request-panel" aria-label="Raise-hand requests">
@@ -356,8 +370,10 @@ function MeetingSurface({ roomId, role, audienceMode, onMeetingEnd }) {
       ) : (
         <HlsPlayer />
       )}
+        </div>
 
-      {activePanel === "chat" ? <ChatPanel onClose={() => setActivePanel(null)} /> : null}
+        <ChatPanel open={activePanel === "chat"} onClose={() => setActivePanel(null)} />
+      </div>
 
       {copied ? <div className="toast">Room ID copied</div> : null}
       {notice ? <div className="toast">{notice}</div> : null}

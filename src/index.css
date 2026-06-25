@@ -268,6 +268,26 @@ button:disabled {
   flex: 0 0 auto;
 }
 
+/* Row that holds the main stage and the chat side panel side-by-side. The
+   header sits above it and the control bar below, so the chat panel can never
+   overlap them or push content down. */
+.meeting-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+/* The stage column (presenter / request panel / grid / HLS). Shrinks to the
+   left when the chat panel opens. */
+.meeting-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .meeting-header {
   min-height: 64px;
   display: flex;
@@ -712,18 +732,21 @@ button:disabled {
   font-weight: 800;
 }
 
+/* In-flow side column. Always mounted (so the chat subscription stays alive);
+   `display: none` while closed keeps it out of the layout without unmounting. */
 .side-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  z-index: 6;
-  width: min(380px, 92vw);
-  height: 100vh;
-  display: flex;
+  flex: 0 0 min(380px, 38vw);
+  min-height: 0;
+  height: 100%;
+  display: none;
   flex-direction: column;
   background: var(--paper);
+  color: var(--ink);
   border-left: 1px solid var(--line);
-  box-shadow: var(--shadow);
+}
+
+.side-panel.open {
+  display: flex;
 }
 
 .side-panel-header {
@@ -937,6 +960,18 @@ button:disabled {
   .participant-grid {
     grid-template-columns: 1fr;
     padding: 12px;
+  }
+
+  /* On narrow screens the stage is too small to share — the open chat panel
+     becomes a full-screen overlay instead of a side column. */
+  .side-panel.open {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    flex-basis: auto;
+    width: 100%;
+    height: 100%;
+    box-shadow: var(--shadow);
   }
 
   .control-bar {

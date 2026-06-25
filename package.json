@@ -4,7 +4,7 @@
   "private": true,
   "description": "Backend-free React frontend for VideoSDK live classes (hardcoded token + meeting id).",
   "dependencies": {
-    "@videosdk.live/react-sdk": "^0.12.6",
+    "@videosdk.live/react-sdk": "^0.13.0",
     "hls.js": "^1.6.16",
     "lucide-react": "^0.468.0",
     "react": "^18.2.0",
