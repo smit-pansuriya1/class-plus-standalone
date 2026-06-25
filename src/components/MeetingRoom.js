@@ -112,6 +112,20 @@ function MeetingSurface({ roomId, role, audienceMode, onMeetingEnd }) {
         } catch (error) {
           console.error("[Tutor] failed to start media", error);
         }
+
+        // Start the HLS broadcast so SIGNALLING_ONLY (HLS) audience can watch.
+        // No backend: the tutor triggers it client-side on join.
+        try {
+          meeting.startHls({
+            layout: { type: "SPOTLIGHT", priority: "SPEAKER", gridSize: 4 },
+            theme: "DARK",
+            mode: "video-and-audio",
+            quality: "high",
+            orientation: "landscape",
+          });
+        } catch (error) {
+          console.error("[Tutor] failed to start HLS", error);
+        }
       }
     },
     onMeetingLeft: onMeetingEnd,
