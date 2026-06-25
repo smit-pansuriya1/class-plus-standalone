@@ -5,7 +5,7 @@ import {
   useParticipant,
   usePubSub,
 } from "@videosdk.live/react-sdk";
-import { Check, Copy, Hand, Radio, UserMinus, UsersRound, X } from "lucide-react";
+import { Check, Copy, Hand, MonitorUp, Radio, UserMinus, UsersRound, X } from "lucide-react";
 import { useState } from "react";
 import { SIGNALING_BASE_URL } from "../config";
 import {
@@ -31,6 +31,20 @@ function StageTile({ participantId }) {
   }
 
   return <ParticipantTile participantId={participantId} />;
+}
+
+// Visible screen-share state for everyone on the live grid: a header pill that
+// names the active presenter. presenterId (set via onPresenterChanged) is the
+// SDK's screen-share state — null when nobody is sharing.
+function ScreenShareStatus({ presenterId }) {
+  const { displayName, isLocal } = useParticipant(presenterId);
+
+  return (
+    <span className="status-pill sharing">
+      <MonitorUp size={14} />
+      {isLocal ? "You are sharing" : `${displayName || "Someone"} is sharing`}
+    </span>
+  );
 }
 
 // One row in the tutor's panel. The raiseHand payload only carries the student
@@ -84,6 +98,7 @@ function MeetingSurface({ roomId, role, audienceMode, onMeetingEnd }) {
   const [pendingHands, setPendingHands] = useState([]); // tutor: ids with hands up
   const [active, setActive] = useState([]); // tutor: promoted (on-stage) ids
   const [activePanel, setActivePanel] = useState(null); // "chat" | "webhooks" | null
+  const [screenSharePresenterId, setScreenSharePresenterId] = useState(null); // id of whoever is sharing, else null
 
   const isTutor = role === "tutor";
 
@@ -129,6 +144,9 @@ function MeetingSurface({ roomId, role, audienceMode, onMeetingEnd }) {
       }
     },
     onMeetingLeft: onMeetingEnd,
+    // Screen-share state: fires with the presenter's id when a share starts and
+    // null when it stops. Drives the header indicator + PresenterView.
+    onPresenterChanged: (presenterId) => setScreenSharePresenterId(presenterId || null),
     onError: (error) => {
       console.error("[VideoSDK]", error);
       setStatus("error");
@@ -241,7 +259,14 @@ function MeetingSurface({ roomId, role, audienceMode, onMeetingEnd }) {
     }
   };
 
-  const presenterId = meeting.presenterId;
+  // Screen-share state. When WE are sharing, the SDK reports it via
+  // localScreenShareOn (the presenter-changed event mainly tracks REMOTE
+  // presenters), so resolve the local case first. Otherwise prefer the
+  // event-driven id, falling back to meeting.presenterId for a share already in
+  // progress when we joined.
+  const presenterId = meeting.localScreenShareOn
+    ? localParticipantId
+    : screenSharePresenterId || meeting.presenterId;
   const isOnStage = localMode === MODES.SEND_AND_RECV;
   // HLS audience (SIGNALLING_ONLY) watches the broadcast; everyone else
   // (tutor, promoted students, zero-lag RECV_ONLY audience) uses the live grid.
@@ -264,6 +289,7 @@ function MeetingSurface({ roomId, role, audienceMode, onMeetingEnd }) {
             <Radio size={14} />
             {status}
           </span>
+          {presenterId ? <ScreenShareStatus presenterId={presenterId} /> : null}
           <button className="room-copy" type="button" onClick={copyRoomId} title="Copy room ID">
             <span>{roomId}</span>
             <Copy size={16} />

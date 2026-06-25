@@ -1,4 +1,4 @@
-import { useMeeting } from "@videosdk.live/react-sdk";
+import { createScreenShareVideoTrack, useMeeting } from "@videosdk.live/react-sdk";
 import {
   Hand,
   MessageSquare,
@@ -80,6 +80,15 @@ export default function Controls({
               <button
                 type="button"
                 className={`control-button ${localScreenShareOn ? "active" : ""}`}
+                // onClick={async () => {
+                //   const track = await createScreenShareVideoTrack({
+                //     encoderConfig: "h1080p_30fps",
+
+                //   })
+
+                //   toggleScreenShare(track)
+                // }
+                // }
                 onClick={() => toggleScreenShare()}
                 title={localScreenShareOn ? "Stop sharing screen" : "Share screen"}
                 aria-label={localScreenShareOn ? "Stop sharing screen" : "Share screen"}

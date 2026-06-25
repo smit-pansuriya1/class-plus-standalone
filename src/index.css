@@ -337,6 +337,28 @@ button:disabled {
   background: var(--red);
 }
 
+.status-pill.sharing {
+  background: var(--green);
+  text-transform: none;
+}
+
+.presenter-stats {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: #ffffff;
+  background: rgba(15, 14, 11, 0.82);
+  backdrop-filter: blur(10px);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
 .room-copy {
   min-width: 0;
   min-height: 36px;
